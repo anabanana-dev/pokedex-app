@@ -1,11 +1,11 @@
-import { QueryKey } from 'react-query';
+import { QueryKey } from '@tanstack/react-query';
 
-export const createPaginationKey = (offset): QueryKey => [
+export const createPaginationKey = (offset: number): QueryKey => [
   'usePaginationList',
-  offset
+  offset,
 ];
 
-export const createEvolutionKey = (pokemonId): QueryKey => [
+export const createEvolutionKey = (pokemonId: string | number): QueryKey => [
   'useEvolution',
-  pokemonId
+  pokemonId,
 ];

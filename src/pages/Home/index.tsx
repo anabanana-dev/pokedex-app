@@ -1,9 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
-  Text,
-  View,
-  SafeAreaView,
-  Button,
   ActivityIndicator,
   ListRenderItemInfo
 } from 'react-native';
@@ -13,64 +9,71 @@ import {
   PlaceholderLine,
   Fade
 } from 'rn-placeholder';
-import usePaginationList from '../../services/pokemons/';
+
+import { usePaginationList } from '../../services/pokemons';
 import Header from './components/Header';
 import Title from './components/Title';
 import Card from './components/Card';
-
-import { Container, Content, List, ContentLoading } from './styles';
+import { Container, Content, List } from './styles';
 import { PokemonEntity } from '../../services/pokemons/types';
 
+
+const SkeletonItem = () => (
+  <Placeholder
+    style={{ marginBottom: 20, paddingHorizontal: 20 }}
+    Animation={Fade}
+    Left={() => <PlaceholderMedia style={{ marginRight: 15 }} size={80} isRound />}
+  >
+    <PlaceholderLine width={60} />
+    <PlaceholderLine width={40} />
+  </Placeholder>
+);
+
 const Home = () => {
-  const [offset, setOffset] = useState(8);
   const {
-    pokemons,
+    data: pokemons,
     isLoading,
     fetchNextPage,
     isFetchingNextPage,
-    hasNextPage
+    hasNextPage,
   } = usePaginationList();
 
-  const skeletons = Array.from(Array(20));
+  // CORREÇÃO: O array de skeletons é apenas para o loading inicial
+  const skeletonData = isLoading ? Array.from(Array(10).keys()) : [];
 
-  const renderItem = ({ item, index }) => {
-    if (isLoading) {
-      return (
-        <ContentLoading key={index}>
-          {skeletons.map((_) => (
-            <Placeholder
-              style={{ marginBottom: 20 }}
-              Animation={Fade}
-              Right={() => (
-                <PlaceholderMedia
-                  style={{ marginRight: 15 }}
-                  size={60}
-                  isRound
-                />
-              )}
-            >
-              <PlaceholderLine width={40} />
-              <PlaceholderLine width={40} />
-              <PlaceholderLine width={25} />
-            </Placeholder>
-          ))}
-        </ContentLoading>
-      );
-    }
-    return <Card key={item.id} pokemon={item} />;
-  };
-
+  // CORREÇÃO: A função de renderização foi simplificada
+  const renderItem = useCallback(({ item }: ListRenderItemInfo<PokemonEntity>) => {
+    return <Card pokemon={item} />;
+  }, []);
+  
+  // CORREÇÃO: Lógica de paginação simplificada para usar o estado do React Query
   const loadMorePosts = useCallback(() => {
-    if (!isFetchingNextPage && hasNextPage) {
-      fetchNextPage({ pageParam: { offset: offset } });
-      setOffset((prev) => prev + 8);
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [offset, fetchNextPage, isFetchingNextPage, hasNextPage]);
-
-  const loadingPosts = () => {
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  
+  // Componente para o indicador de carregamento no final da lista
+  const ListFooter = () => {
     if (!isFetchingNextPage) return null;
-    return <ActivityIndicator style={{ marginBottom: 20 }} color={'#000'} />;
+    return <ActivityIndicator style={{ marginVertical: 20 }} color={'#C70039'} size="large" />;
   };
+  
+  if (isLoading) {
+    return (
+      <Container>
+        <Header />
+        <Content>
+          <Title />
+          <List
+            data={skeletonData}
+            keyExtractor={(item) => `skeleton-${item}`}
+            renderItem={SkeletonItem}
+          />
+        </Content>
+      </Container>
+    )
+  }
 
   return (
     <Container>
@@ -78,12 +81,17 @@ const Home = () => {
       <Content>
         <Title />
         <List
-          data={!isLoading ? pokemons : skeletons}
+          data={pokemons}
           renderItem={renderItem}
-          keyExtractor={(item: PokemonEntity) => item?.id.toString()}
+          // CORREÇÃO: keyExtractor seguro para evitar crashes
+          keyExtractor={(item: PokemonEntity) => String(item.id)}
           onEndReached={loadMorePosts}
-          onEndReachedThreshold={0.3}
-          ListFooterComponent={loadingPosts}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={ListFooter}
+          // Performance
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={11}
         />
       </Content>
     </Container>
