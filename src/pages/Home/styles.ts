@@ -3,7 +3,7 @@ import styled from 'styled-components/native';
 export const Container = styled.SafeAreaView`
   flex: 1;
   flex-direction: column;
-    background-color: ${({theme}) => theme.colors.white}; 
+  background: ${({ theme }: { theme: any }) => theme.colors.white};
 `;
 
 export const Content = styled.View`
@@ -15,5 +15,8 @@ export const List = styled.FlatList`
   flex: 1;
   padding-top: 10px;
   margin-top: 20px;
+`;
 
+export const ContentLoading = styled.View`
+  margin-top: 40px;
 `;

@@ -1,11 +1,11 @@
-import pokeball from '../../../../../assets/pokeball.jpg'
+import pokeball from '../../../../../assets/pokeball.png'
 
 import { Container, IconBall } from './styles';
 
 const Header = () => {
     return (
       <Container>
-        <IconBall/>
+        <IconBall source={pokeball} resizeMode='cover'/>
         </Container>
     );
 }
