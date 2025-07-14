@@ -1,4 +1,4 @@
-import { StatusBar } from 'expo-status-bar';
+
 import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
 import Routes from './src/routes';

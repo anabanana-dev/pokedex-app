@@ -1,7 +1,15 @@
 import React, { useCallback } from 'react';
+import { Container, Content} from './styles';
+import Header from './components/Header';
+import Title from './components/Title'
+import Card from './components/Card';
+import {List} from './styles';
+
 import {
   ActivityIndicator,
-  ListRenderItemInfo
+  ListRenderItemInfo,
+  StyleSheet,
+  Text
 } from 'react-native';
 import {
   Placeholder,
@@ -9,20 +17,88 @@ import {
   PlaceholderLine,
   Fade
 } from 'rn-placeholder';
+import { useInfiniteQuery } from 'react-query';
 
-import { usePaginationList } from '../../services/pokemons';
-import Header from './components/Header';
-import Title from './components/Title';
-import Card from './components/Card';
-import { Container, Content, List } from './styles';
-import { PokemonEntity } from '../../services/pokemons/types';
 
+type ApiResultItem = {
+  name: string;
+  url: string;
+};
+
+
+type PokemonApiResult = {
+  count: number;
+  next?: string;
+  previous?: string;
+  results: ApiResultItem[];
+};
+
+
+type PokemonCardData = {
+  id: number;
+  name: string;
+  image: string;
+};
+const fetchPokemons = async ({ pageParam = 0 }): Promise<PokemonApiResult> => {
+  const response = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?offset=${pageParam}&limit=20`
+  );
+  if (!response.ok) {
+    throw new Error('Falha ao buscar pokémons na API.');
+  }
+  return response.json();
+};
+
+const usePaginationList = () => {
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery( 
+    'pokemons', 
+    fetchPokemons,
+    {
+      
+      getNextPageParam: (lastPage, allPages) => {
+        if (lastPage.next) {
+          return allPages.length * 20;
+        }
+        return undefined;
+      },
+    }
+  );
+
+  const pokemons: PokemonCardData[] =
+    data?.pages
+      .flatMap((page) => page.results)
+      .map((pokemon) => {
+        const id = Number(pokemon.url.split('/').filter(Boolean).pop());
+        const image = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+        return {
+          id,
+          name: pokemon.name,
+          image,
+        };
+      }) ?? [];
+
+  return {
+    data: pokemons,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  };
+};
 
 const SkeletonItem = () => (
   <Placeholder
-    style={{ marginBottom: 20, paddingHorizontal: 20 }}
+    style={styles.placeholder}
     Animation={Fade}
-    Left={() => <PlaceholderMedia style={{ marginRight: 15 }} size={80} isRound />}
+    Left={() => <PlaceholderMedia style={styles.placeholderMedia} size={80} isRound />}
   >
     <PlaceholderLine width={60} />
     <PlaceholderLine width={40} />
@@ -36,43 +112,40 @@ const Home = () => {
     fetchNextPage,
     isFetchingNextPage,
     hasNextPage,
+    error,
   } = usePaginationList();
 
-  // CORREÇÃO: O array de skeletons é apenas para o loading inicial
-  const skeletonData = isLoading ? Array.from(Array(10).keys()) : [];
+  const skeletonData = React.useMemo(() => Array.from({ length: 10 }), []);
 
-  // CORREÇÃO: A função de renderização foi simplificada
-  const renderItem = useCallback(({ item }: ListRenderItemInfo<PokemonEntity>) => {
-    return <Card pokemon={item} />;
-  }, []);
+  const renderItem = useCallback(({ item }: ListRenderItemInfo<PokemonCardData>) => {
+
+  return (
+    <Text style={{ padding: 20, fontSize: 16 }}>
+      {item.id}: {item.name}
+    </Text>
+  );
+}, []);
   
-  // CORREÇÃO: Lógica de paginação simplificada para usar o estado do React Query
   const loadMorePosts = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
   
-  // Componente para o indicador de carregamento no final da lista
   const ListFooter = () => {
     if (!isFetchingNextPage) return null;
-    return <ActivityIndicator style={{ marginVertical: 20 }} color={'#C70039'} size="large" />;
+    return <ActivityIndicator style={styles.footerIndicator} color={'#C70039'} size="large" />;
   };
   
-  if (isLoading) {
+  if (error) {
     return (
       <Container>
         <Header />
-        <Content>
-          <Title />
-          <List
-            data={skeletonData}
-            keyExtractor={(item) => `skeleton-${item}`}
-            renderItem={SkeletonItem}
-          />
+        <Content style={styles.errorContainer}>
+          <Text style={styles.errorText}>Ocorreu um erro ao carregar.</Text>
         </Content>
       </Container>
-    )
+    );
   }
 
   return (
@@ -81,14 +154,12 @@ const Home = () => {
       <Content>
         <Title />
         <List
-          data={pokemons}
-          renderItem={renderItem}
-          // CORREÇÃO: keyExtractor seguro para evitar crashes
-          keyExtractor={(item: PokemonEntity) => String(item.id)}
+          data={isLoading ? skeletonData : pokemons}
+          renderItem={isLoading ? SkeletonItem : renderItem}
+          keyExtractor={(item: any, index: number) => `item-${item.id || index}`}
           onEndReached={loadMorePosts}
           onEndReachedThreshold={0.5}
           ListFooterComponent={ListFooter}
-          // Performance
           initialNumToRender={10}
           maxToRenderPerBatch={10}
           windowSize={11}
@@ -97,5 +168,13 @@ const Home = () => {
     </Container>
   );
 };
+
+const styles = StyleSheet.create({
+  placeholder: { marginBottom: 20, paddingHorizontal: 20 },
+  placeholderMedia: { marginRight: 15 },
+  footerIndicator: { marginVertical: 20 },
+  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  errorText: { fontSize: 16 }
+});
 
 export default Home;
