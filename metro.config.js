@@ -1,14 +1,17 @@
-/**
- * metro.config.js
- * Configuração básica para Metro bundler
- */
+const { getDefaultConfig } = require('metro-config');
 
-module.exports = {
-  transformer: {
-    babelTransformerPath: require.resolve('react-native-svg-transformer'), // só se usar svg
-  },
-  resolver: {
-    assetExts: ['txt', 'png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'svg'], // ajuste conforme suas necessidades
-    sourceExts: ['js', 'jsx', 'ts', 'tsx', 'json'], // suas extensões de código
-  },
-};
+module.exports = (async () => {
+  const {
+    resolver: { sourceExts, assetExts }
+  } = await getDefaultConfig();
+
+  return {
+    transformer: {
+      babelTransformerPath: require.resolve('react-native-svg-transformer'), // só se usar svg
+    },
+    resolver: {
+      assetExts: assetExts.filter(ext => ext !== 'svg'), // remove svg dos assets
+      sourceExts: [...sourceExts, 'svg'], // adiciona svg em sourceExts
+    },
+  };
+})();
