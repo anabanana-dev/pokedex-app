@@ -1,5 +1,6 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+// src/pages/Detail/types.ts
+import { PokemonEntity } from '../../services/pokemons/types'; // ajuste para o caminho correto
 
-import { RootStackParamList } from '../../routes';
-
-export type Props = NativeStackScreenProps<RootStackParamList, 'Detail'>;
+export type SlideProps = {
+  pokemon: PokemonEntity;
+};

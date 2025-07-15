@@ -14,13 +14,13 @@ type EvolutionSectionProps = {
   minLevel: number;
 };
 
-const EvolutionSection = ({
+const EvolutionSection: React.FC<EvolutionSectionProps> = ({
   firstImage,
   firstName,
   secondImage,
   secondName,
-  minLevel
-}: EvolutionSectionProps) => {
+  minLevel,
+}) => {
   const { colors } = useTheme();
 
   return (

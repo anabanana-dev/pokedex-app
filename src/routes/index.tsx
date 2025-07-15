@@ -4,11 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Home from '../pages/Home';
 import Detail from '../pages/Detail';
-import { PokemonEntity } from '../services/pokemons/types';
 
 export type RootStackParamList = {
   Home: undefined;
-  Detail: { pokemon: PokemonEntity };
+  Detail: { pokemonId: number };
 };
 
 const Routes = () => {
@@ -16,11 +15,7 @@ const Routes = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false
-        }}
-      >
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Detail" component={Detail} />
       </Stack.Navigator>

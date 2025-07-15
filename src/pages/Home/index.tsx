@@ -1,30 +1,29 @@
 import React, { useCallback } from 'react';
-import { Container, Content} from './styles';
+import { Container, Content, List } from './styles';
 import Header from './components/Header';
-import Title from './components/Title'
-import Card from './components/Card';
-import {List} from './styles';
-
+import Title from './components/Title';
 import {
   ActivityIndicator,
   ListRenderItemInfo,
   StyleSheet,
-  Text
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 import {
   Placeholder,
   PlaceholderMedia,
   PlaceholderLine,
-  Fade
+  Fade,
 } from 'rn-placeholder';
 import { useInfiniteQuery } from 'react-query';
-
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../routes';
 
 type ApiResultItem = {
   name: string;
   url: string;
 };
-
 
 type PokemonApiResult = {
   count: number;
@@ -33,12 +32,15 @@ type PokemonApiResult = {
   results: ApiResultItem[];
 };
 
-
 type PokemonCardData = {
   id: number;
   name: string;
   image: string;
 };
+
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 const fetchPokemons = async ({ pageParam = 0 }): Promise<PokemonApiResult> => {
   const response = await fetch(
     `https://pokeapi.co/api/v2/pokemon?offset=${pageParam}&limit=20`
@@ -57,11 +59,10 @@ const usePaginationList = () => {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteQuery( 
-    'pokemons', 
+  } = useInfiniteQuery(
+    'pokemons',
     fetchPokemons,
     {
-      
       getNextPageParam: (lastPage, allPages) => {
         if (lastPage.next) {
           return allPages.length * 20;
@@ -106,6 +107,8 @@ const SkeletonItem = () => (
 );
 
 const Home = () => {
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+
   const {
     data: pokemons,
     isLoading,
@@ -117,26 +120,19 @@ const Home = () => {
 
   const skeletonData = React.useMemo(() => Array.from({ length: 10 }), []);
 
-  const renderItem = useCallback(({ item }: ListRenderItemInfo<PokemonCardData>) => {
+ 
 
-  return (
-    <Text style={{ padding: 20, fontSize: 16 }}>
-      {item.id}: {item.name}
-    </Text>
-  );
-}, []);
-  
   const loadMorePosts = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-  
+
   const ListFooter = () => {
     if (!isFetchingNextPage) return null;
     return <ActivityIndicator style={styles.footerIndicator} color={'#C70039'} size="large" />;
   };
-  
+
   if (error) {
     return (
       <Container>
@@ -174,7 +170,7 @@ const styles = StyleSheet.create({
   placeholderMedia: { marginRight: 15 },
   footerIndicator: { marginVertical: 20 },
   errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: 16 }
+  errorText: { fontSize: 16 },
 });
 
 export default Home;

@@ -1,3 +1,4 @@
+
 import styled from 'styled-components/native';
 import { darken } from 'polished';
 import { Dimensions, Animated } from 'react-native';
@@ -7,14 +8,10 @@ const { height, width } = Dimensions.get('window');
 import Constants from 'expo-constants';
 
 import { TAB_BUTTON_WIDTH } from './tabs';
+import { DefaultTheme } from 'styled-components';
 
 export const Container = styled(Animated.View)`
-  height: ${height - (Constants.statusBarHeight + 64)}px;
-  background: ${({ theme }) => theme.colors.white};
-  border-top-left-radius: 32px;
-  border-top-right-radius: 32px;
-  padding: 16px 0;
-  top: -30px;
+  background: ${({ theme }: { theme: DefaultTheme }) => theme.colors.white};
 `;
 export const ImageBall = styled.Image`
   width: 50px;
@@ -42,14 +39,12 @@ export const TabButton = styled.TouchableOpacity`
 `;
 
 export const SelectedIndicator = styled(Animated.View)`
+  background: ${({ theme }: { theme: DefaultTheme }) => theme.colors.blue};
   height: 2px;
   width: ${TAB_BUTTON_WIDTH}px;
-  background: ${({ theme }) => theme.colors.blue};
-
   position: absolute;
   bottom: -1px;
 `;
-
 export const SlideWrapper = styled.View`
   width: ${width}px;
   padding: 24px;
@@ -67,8 +62,12 @@ export const ContentType = styled.ScrollView`
   height: 20px;
 `;
 
-export const Type = styled.View<{ backgroundColor: 'string' }>`
-  background-color: ${(props) => darken(0.2, props.backgroundColor)}
+interface TypeProps {
+  backgroundColor: string;
+}
+
+export const Type = styled.View<TypeProps>`
+  background-color: ${(props: TypeProps) => darken(0.2, props.backgroundColor)};
   min-width: 40px;
   height: 25px;
   padding: 4px;
@@ -82,7 +81,6 @@ export const Type = styled.View<{ backgroundColor: 'string' }>`
   shadow-radius: 4.65px;
   elevation: 8;
 `;
-
 export const SectionAbout = styled.View`
   margin: 0px 30px;
   margin-top: 30px;

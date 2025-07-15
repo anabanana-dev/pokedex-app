@@ -26,7 +26,7 @@ interface Props {
   pokemon: PokemonEntity;
 }
 
-const About = ({ pokemon }: Props) => {
+const About: React.FC<Props> = ({ pokemon }) => {
   const pokemonFormatted = useMemo(() => {
     return {
       ...pokemon,

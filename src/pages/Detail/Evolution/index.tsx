@@ -1,24 +1,31 @@
 import React from 'react';
+import { ActivityIndicator } from 'react-native';
 import Text from '../../../components/Text';
 
-import { ActivityIndicator } from 'react-native';
 import EvolutionSection from './EvolutionSection';
 import { Content, Title } from './styles';
 import { PokemonEntity } from '../../../services/pokemons/types';
 import { useEvolution } from '../../../services/pokemons/useEvolution';
 import { POKEMON_TYPE_COLORS } from '../../../constants';
+
 interface Props {
   pokemon: PokemonEntity;
 }
+
 const Evolution = ({ pokemon }: Props) => {
   const { evolutions, isLoading } = useEvolution(pokemon.id);
 
+  
+  const primaryType = pokemon.types[0].type.name.toLowerCase();
+
+
+ const typeColor = primaryType in POKEMON_TYPE_COLORS
+  ? POKEMON_TYPE_COLORS[primaryType as keyof typeof POKEMON_TYPE_COLORS]
+  : '#777';
+
   return (
     <>
-      <Title
-        bold
-        color={POKEMON_TYPE_COLORS[pokemon.types[0].type.name.toLowerCase()]}
-      >
+      <Title bold color={typeColor}>
         Evolução
       </Title>
       {isLoading ? (
@@ -27,29 +34,29 @@ const Evolution = ({ pokemon }: Props) => {
         <>
           {evolutions?.first_evolution || evolutions?.second_evolution ? (
             <Content>
-              {evolutions.first_evolution && (
+              {evolutions.base_form && evolutions.first_evolution && (
                 <EvolutionSection
                   firstImage={evolutions.base_form.image}
                   firstName={evolutions.base_form.name}
                   secondName={evolutions.first_evolution.name}
                   secondImage={evolutions.first_evolution.image}
-                  minLevel={evolutions.first_evolution.min_level}
+                  minLevel={evolutions.first_evolution.min_level ?? 0} // fallback para 0
                 />
               )}
 
-              {evolutions?.second_evolution && (
+              {evolutions.second_evolution && evolutions.first_evolution && (
                 <EvolutionSection
                   firstImage={evolutions.first_evolution.image}
                   firstName={evolutions.first_evolution.name}
                   secondName={evolutions.second_evolution.name}
                   secondImage={evolutions.second_evolution.image}
-                  minLevel={evolutions.second_evolution.min_level}
+                  minLevel={evolutions.second_evolution.min_level ?? 0} // fallback para 0
                 />
               )}
             </Content>
           ) : (
             <Content>
-              <Text color="grey">No evolutions</Text>;
+              <Text color="grey">No evolutions</Text>
             </Content>
           )}
         </>

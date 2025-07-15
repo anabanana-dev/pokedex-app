@@ -1,27 +1,21 @@
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useState,
-  useEffect
-} from 'react';
+import React, { useCallback, useRef, useMemo, useState, useEffect } from 'react';
 import {
   Animated,
   Dimensions,
   ScrollView,
   SafeAreaView,
   View,
-  Image,
   TouchableOpacity,
   NativeSyntheticEvent,
-  NativeScrollEvent
+  NativeScrollEvent,
+  ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { lighten } from 'polished';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// Componentes e Constantes
 import Text from '../../components/Text';
 import pokeballIcon from '../../../assets/pokeball-transparent.jpg';
 import { tabs } from './tabs';
@@ -34,19 +28,44 @@ import {
   ContentInfo,
   ContentType,
   Type,
-  SectionAbout
+  SectionAbout,
 } from './styles';
-import { Props } from './types';
 import { POKEMON_TYPE_COLORS } from '../../constants';
 
-const Detail = ({ route }: Props) => {
-  const {
-    params: { pokemon }
-  } = route;
+import { RootStackParamList } from '../../routes';
 
+type DetailRouteProp = RouteProp<RootStackParamList, 'Detail'>;
+type DetailNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Detail'>;
+
+type Props = {
+  route: DetailRouteProp;
+};
+
+type PokemonType = {
+  slot: number;
+  type: {
+    name: string;
+    url: string;
+  };
+};
+
+type PokemonData = {
+  id: number;
+  name: string;
+  image: string;
+  types: PokemonType[];
+  // adicione outros campos que seus slides possam precisar
+};
+
+const Detail: React.FC<Props> = ({ route }) => {
+  const { pokemonId } = route.params as { pokemonId: number };
   const scrollViewRef = useRef<ScrollView>(null);
-  const navigation = useNavigation();
+  const navigation = useNavigation<DetailNavigationProp>();
   const { width } = Dimensions.get('window');
+
+  const [pokemon, setPokemon] = useState<PokemonData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [tabActive, setTabActive] = useState(0);
   const translateY = useRef(new Animated.Value(0)).current;
@@ -57,33 +76,57 @@ const Detail = ({ route }: Props) => {
         Animated.timing(translateY, {
           toValue: -15,
           duration: 1200,
-          useNativeDriver: true
+          useNativeDriver: true,
         }),
         Animated.timing(translateY, {
           toValue: 0,
           duration: 1200,
-          useNativeDriver: true
-        })
+          useNativeDriver: true,
+        }),
       ]),
       { iterations: -1 }
     ).start();
   }, [translateY]);
 
+  useEffect(() => {
+    const fetchPokemon = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+        if (!response.ok) throw new Error('Erro ao buscar dados do Pokémon');
+        const data = await response.json();
+
+        const formattedData: PokemonData = {
+          id: data.id,
+          name: data.name,
+          types: data.types,
+          image: data.sprites.other['official-artwork'].front_default || '',
+        };
+
+        setPokemon(formattedData);
+      } catch (e) {
+        setError(String(e));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPokemon();
+  }, [pokemonId]);
+
   const primaryTypeColor = useMemo(() => {
-    const typeName = pokemon?.types?.[0]?.type?.name?.toLowerCase();
-    if (!typeName) {
-      return '#A8A878'; // Cor padrão se não houver tipo
-    }
-    // AQUI A CORREÇÃO DE TIPAGEM (1)
+    if (!pokemon) return '#A8A878';
+    const typeName = pokemon.types?.[0]?.type?.name?.toLowerCase();
     return POKEMON_TYPE_COLORS[typeName as keyof typeof POKEMON_TYPE_COLORS] ?? '#A8A878';
-  }, [pokemon.types]);
+  }, [pokemon]);
 
   const handleChangeTab = useCallback(
     (index: number) => {
       if (scrollViewRef.current) {
         scrollViewRef.current.scrollTo({
           x: width * index,
-          animated: true
+          animated: true,
         });
       }
     },
@@ -99,6 +142,27 @@ const Detail = ({ route }: Props) => {
     [width]
   );
 
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#C70039" />
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !pokemon) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text variant="body1">Erro ao carregar dados do Pokémon.</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text variant="caption" color="blue">
+            Voltar
+          </Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: primaryTypeColor }}>
       <LinearGradient
@@ -111,7 +175,14 @@ const Detail = ({ route }: Props) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Feather name="arrow-left" size={24} color="white" />
           </TouchableOpacity>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20, marginLeft: 20 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 20,
+              marginLeft: 20,
+            }}
+          >
             <Animated.Image
               style={{ height: 120, width: 120, transform: [{ translateY }] }}
               source={{ uri: pokemon.image }}
@@ -123,7 +194,7 @@ const Detail = ({ route }: Props) => {
               <Text variant="body1" bold color="white">
                 {pokemon.name}
               </Text>
-              <ContentType horizontal>
+              <ContentType horizontal showsHorizontalScrollIndicator={false}>
                 {pokemon.types?.map((typeInfo, index) => {
                   const typeName = typeInfo?.type?.name;
                   if (!typeName) return null;
@@ -132,10 +203,8 @@ const Detail = ({ route }: Props) => {
                     <Type
                       key={`${typeName}-${index}`}
                       backgroundColor={
-                        // AQUI A CORREÇÃO DE TIPAGEM (2)
-                        POKEMON_TYPE_COLORS[
-                          typeName.toLowerCase() as keyof typeof POKEMON_TYPE_COLORS
-                        ] ?? '#A8A878'
+                        POKEMON_TYPE_COLORS[typeName.toLowerCase() as keyof typeof POKEMON_TYPE_COLORS] ??
+                        '#A8A878'
                       }
                     >
                       <Text color="white" variant="caption">
@@ -169,11 +238,13 @@ const Detail = ({ route }: Props) => {
           bounces={false}
           onMomentumScrollEnd={handleScroll}
         >
-          {tabs.map(({ slide: Slide, name }) => (
-            <SlideWrapper key={name}>
-              <Slide pokemon={pokemon} />
-            </SlideWrapper>
-          ))}
+        {tabs?.length > 0 && tabs.map(({ slide: Slide, name }) => (
+  <SlideWrapper key={name}>
+    {}
+    <Slide pokemon={pokemon as any} />
+  </SlideWrapper>
+))}
+
         </Animated.ScrollView>
       </Container>
     </SafeAreaView>
