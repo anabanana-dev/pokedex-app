@@ -1,26 +1,13 @@
-import * as React from 'react';
+import React from 'react';
+
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import Home from '../pages/Home';
-import Detail from '../pages/Detail';
+import { AppRoutes } from './app.routes';
 
-export type RootStackParamList = {
-  Home: undefined;
-  Detail: { pokemonId: number };
-};
-
-const Routes = () => {
-  const Stack = createNativeStackNavigator<RootStackParamList>();
-
+export function Routes() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Detail" component={Detail} />
-      </Stack.Navigator>
+      <AppRoutes />
     </NavigationContainer>
   );
-};
-
-export default Routes;
+}

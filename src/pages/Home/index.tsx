@@ -1,176 +1,114 @@
-import React, { useCallback } from 'react';
-import { Container, Content, List } from './styles';
-import Header from './components/Header';
-import Title from './components/Title';
-import {
-  ActivityIndicator,
-  ListRenderItemInfo,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
-import {
-  Placeholder,
-  PlaceholderMedia,
-  PlaceholderLine,
-  Fade,
-} from 'rn-placeholder';
-import { useInfiniteQuery } from 'react-query';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../routes';
+import React, { useState, useEffect } from 'react';
+import { Alert, FlatList } from 'react-native';
 
-type ApiResultItem = {
+import { Card } from '../../components/Card';
+import { Load } from '../../components/Load';
+
+import pokeballImage from '../../assets/img/pokeball.png';
+
+import api from '../../services/api';
+
+import * as S from './styles';
+import { useNavigation } from '@react-navigation/native';
+
+type PokemonType = {
+  type: {
+    name: string;
+  };
+};
+
+export interface Pokemon {
   name: string;
   url: string;
-};
-
-type PokemonApiResult = {
-  count: number;
-  next?: string;
-  previous?: string;
-  results: ApiResultItem[];
-};
-
-type PokemonCardData = {
   id: number;
-  name: string;
-  image: string;
-};
+  types: PokemonType[];
+}
 
+export interface Request {
+  id: number;
+  types: PokemonType[];
+}
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+export function Home() {
+  const { navigate } = useNavigation();
 
-const fetchPokemons = async ({ pageParam = 0 }): Promise<PokemonApiResult> => {
-  const response = await fetch(
-    `https://pokeapi.co/api/v2/pokemon?offset=${pageParam}&limit=20`
-  );
-  if (!response.ok) {
-    throw new Error('Falha ao buscar pokémons na API.');
-  }
-  return response.json();
-};
+  const [load, setLoad] = useState<boolean>(true);
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
-const usePaginationList = () => {
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useInfiniteQuery(
-    'pokemons',
-    fetchPokemons,
-    {
-      getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.next) {
-          return allPages.length * 20;
-        }
-        return undefined;
-      },
+  useEffect(() => {
+    async function getPokemons(): Promise<void> {
+      try {
+        const response = await api.get('/pokemon');
+        const { results } = response.data;
+
+        const payloadPokemons = await Promise.all(
+          results.map(async (pokemon: Pokemon) => {
+            const { id, types } = await getMoreInfoAboutPokemonsByUrl(
+              pokemon.url,
+            );
+
+            return {
+              name: pokemon.name,
+              id,
+              types,
+            };
+          }),
+        );
+
+        setPokemons(payloadPokemons as Pokemon[]);
+      } catch (err) {
+        Alert.alert('ops, algo de errado aconteceu, tente mais tarde');
+      } finally {
+        setLoad(false);
+      }
     }
-  );
 
-  const pokemons: PokemonCardData[] =
-    data?.pages
-      .flatMap((page) => page.results)
-      .map((pokemon) => {
-        const id = Number(pokemon.url.split('/').filter(Boolean).pop());
-        const image = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-        return {
-          id,
-          name: pokemon.name,
-          image,
-        };
-      }) ?? [];
+    getPokemons();
+  }, []);
 
-  return {
-    data: pokemons,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    error,
-  };
-};
+  async function getMoreInfoAboutPokemonsByUrl(url: string): Promise<Request> {
+    const response = await api.get(url);
 
-const SkeletonItem = () => (
-  <Placeholder
-    style={styles.placeholder}
-    Animation={Fade}
-    Left={() => <PlaceholderMedia style={styles.placeholderMedia} size={80} isRound />}
-  >
-    <PlaceholderLine width={60} />
-    <PlaceholderLine width={40} />
-  </Placeholder>
-);
+    const { id, types } = response.data as Request;
 
-const Home = () => {
-  const navigation = useNavigation<HomeScreenNavigationProp>();
-
-  const {
-    data: pokemons,
-    isLoading,
-    fetchNextPage,
-    isFetchingNextPage,
-    hasNextPage,
-    error,
-  } = usePaginationList();
-
-  const skeletonData = React.useMemo(() => Array.from({ length: 10 }), []);
-
- 
-
-  const loadMorePosts = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const ListFooter = () => {
-    if (!isFetchingNextPage) return null;
-    return <ActivityIndicator style={styles.footerIndicator} color={'#C70039'} size="large" />;
-  };
-
-  if (error) {
-    return (
-      <Container>
-        <Header />
-        <Content style={styles.errorContainer}>
-          <Text style={styles.errorText}>Ocorreu um erro ao carregar.</Text>
-        </Content>
-      </Container>
-    );
+    return { id, types };
   }
 
-  return (
-    <Container>
-      <Header />
-      <Content>
-        <Title />
-        <List
-          data={isLoading ? skeletonData : pokemons}
-          renderItem={isLoading ? SkeletonItem : renderItem}
-          keyExtractor={(item: any, index: number) => `item-${item.id || index}`}
-          onEndReached={loadMorePosts}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={ListFooter}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={11}
+  function handleNavigationPokemonDetail(pokemonId: number) {
+    navigate('About', {
+      pokemonId,
+    });
+  }
+  return load ? (
+    <S.LoadingScreen>
+      <Load />
+    </S.LoadingScreen>
+  ) : (
+    <>
+      <S.Container>
+        <FlatList
+          ListHeaderComponent={
+            <>
+              <S.Header source={pokeballImage} />
+              <S.Title> Pokédex</S.Title>
+            </>
+          }
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+          }}
+          data={pokemons}
+          keyExtractor={pokemon => pokemon.id.toString()}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item: pokemon }) => (
+            <Card
+              data={pokemon}
+              onPress={() => {
+                handleNavigationPokemonDetail(pokemon.id);
+              }}
+            />
+          )}
         />
-      </Content>
-    </Container>
+      </S.Container>
+    </>
   );
-};
-
-const styles = StyleSheet.create({
-  placeholder: { marginBottom: 20, paddingHorizontal: 20 },
-  placeholderMedia: { marginRight: 15 },
-  footerIndicator: { marginVertical: 20 },
-  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: 16 },
-});
-
-export default Home;
+}

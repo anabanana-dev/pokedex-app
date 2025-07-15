@@ -1,22 +1,38 @@
-import styled from 'styled-components/native';
+import { Dimensions } from 'react-native';
+import styled, { css } from 'styled-components/native';
 
-export const Container = styled.SafeAreaView`
+const windowWidth = Dimensions.get('window').width;
+
+export const LoadingScreen = styled.View`
   flex: 1;
-  flex-direction: column;
-  background: ${({ theme }: { theme: any }) => theme.colors.white};
+  justify-content: center;
+  align-items: center;
 `;
 
-export const Content = styled.View`
-  flex: 1;
-  margin: 0 20px;
+export const Container = styled.View`
+  ${({ theme }) => css`
+    background: ${theme.colors.background};
+    flex: 1;
+
+    position: relative;
+  `}
 `;
 
-export const List = styled.FlatList`
-  flex: 1;
-  padding-top: 10px;
-  margin-top: 20px;
+export const Header = styled.ImageBackground`
+  ${({ theme }) => css`
+    width: ${windowWidth}px;
+    margin-left: -20px;
+    height: 220px;
+    background: ${theme.colors.background};
+  `}
 `;
 
-export const ContentLoading = styled.View`
-  margin-top: 40px;
+export const Title = styled.Text`
+  ${({ theme }) => css`
+    color: ${theme.colors.text};
+    font-size: 32px;
+    line-height: 38px;
+    font-weight: bold;
+    margin-top: -70px;
+  `}
 `;
