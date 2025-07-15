@@ -2,7 +2,7 @@
   "name": "pokedex-app",
   "license": "0BSD",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -22,18 +22,24 @@
     "polished": "^4.3.1",
     "react": "19.0.0",
     "react-native": "0.79.5",
+    "react-native-gesture-handler": "^2.27.1",
+    "react-native-progress": "^5.0.1",
+    "react-native-reanimated": "^3.18.0",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-shimmer-placeholder": "^2.0.9",
+    "react-native-svg": "^15.12.0",
     "react-query": "^3.39.3",
     "rn-placeholder": "^3.0.3",
     "styled-components": "^6.1.19"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@react-native-community/cli": "^19.1.0",
     "@types/react": "~19.0.10",
     "@types/styled-components-react-native": "^5.2.5",
     "prettier": "^3.6.2",
+    "react-native-svg-transformer": "^1.5.1",
     "typescript": "~5.8.3"
   },
   "private": true

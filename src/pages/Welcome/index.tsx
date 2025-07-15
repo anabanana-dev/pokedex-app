@@ -8,7 +8,8 @@ import pokemonAnimation from './pokemon.json';
 import * as S from './styles';
 
 export function Welcome() {
-  const { navigate } = useNavigation();
+  const { navigate } = useNavigation<any>();
+
 
   function handleNavigateToHome() {
     navigate('Home');

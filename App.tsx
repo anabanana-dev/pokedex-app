@@ -1,16 +1,16 @@
+import { StatusBar } from 'expo-status-bar';
 
-import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
-import Routes from './src/routes';
+
+import { Routes } from './src/routes';
+
 import theme from './src/global/styles/theme';
-import ReactQueryProvider from './src/services/react-query';
 
 export default function App() {
   return (
-    <ReactQueryProvider>
-      <ThemeProvider theme={theme}>
-        <Routes />
-      </ThemeProvider>
-    </ReactQueryProvider>
+    <ThemeProvider theme={theme}>
+      <StatusBar backgroundColor="transparent" translucent />
+      <Routes />
+    </ThemeProvider>
   );
 }

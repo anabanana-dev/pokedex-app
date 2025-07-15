@@ -21,8 +21,8 @@ export const LoadingScreen = styled.View`
 `;
 
 export const Header = styled.View<TypeProps>`
-    ${({ theme }: { theme: DefaultTheme }) => css`
-   background: ${theme.colors.backgroundCard[type as keyof typeof theme.colors.backgroundCard]};
+     ${({ theme, type }: { theme: DefaultTheme } & TypeProps) => css`
+   background:${theme.colors.backgroundCard[type]};
       height: 340px;
       padding: 20px;
 
@@ -87,7 +87,7 @@ export const PokemonTypeContainer = styled.View`
 `;
 
 export const PokemonType = styled.View<TypeProps>`
-  ${({ theme, type }) => css`
+   ${({ theme, type }: { theme: DefaultTheme } & TypeProps) => css`
     width: 61px;
     height: 25px;
 
@@ -120,13 +120,13 @@ export const Container = styled.View`
 `;
 
 export const Title = styled.Text<TypeProps>`
- ${({ theme }: { theme: DefaultTheme }) => css`
+   ${({ theme, type }: { theme: DefaultTheme } & TypeProps) => css`
     font-style: normal;
     font-weight: bold;
     font-size: 16px;
     line-height: 19px;
     padding: 20px;
-    color: ${theme.colors.boxType[type]};
+    color:${theme.colors.boxType[type as keyof typeof theme.colors.boxType]};
   `}
 `;
 
@@ -139,7 +139,7 @@ export const StatusBar = styled.View`
 `;
 
 export const Attributes = styled.Text`
-  ${({ theme }: { theme: DefaultTheme }) => css`
+   ${({ theme, type }: { theme: DefaultTheme } & TypeProps) => css`
     font-style: normal;
     font-weight: 500;
     font-size: 12px;
@@ -151,7 +151,7 @@ export const Attributes = styled.Text`
   `}
 `;
 export const AttributesNumber = styled.Text`
-  ${({ theme }: { theme: DefaultTheme }) => css`
+  ${({ theme, type }: { theme: DefaultTheme } & TypeProps) => css`
     font-style: normal;
     font-weight: normal;
     font-size: 16px;
@@ -167,7 +167,7 @@ export const ContentBar = styled.View`
 `;
 
 export const Ability = styled.Text`
-  ${({ theme }: { theme: DefaultTheme }) => css`
+  ${({ theme, type }: { theme: DefaultTheme } & TypeProps) => css`
     font-style: normal;
     font-weight: normal;
     font-size: 16px;
