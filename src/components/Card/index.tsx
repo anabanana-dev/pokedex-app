@@ -44,7 +44,7 @@ export function Card({ data, ...rest }: CardProps) {
       </S.LeftSide>
 
       <S.RightSide>
-        <S.PokeballCardDetail source={pokeballCardImage} />
+        <S.PokeballCardDetail source={require('../../assets/img/pokeballCard.png')} />
         <CardAnimation>
           <S.PokemonImage
             source={{

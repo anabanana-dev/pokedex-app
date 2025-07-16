@@ -2927,9 +2927,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.5.173:
-  version "1.5.184"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.184.tgz#3ef8b7e1be5482d9b04ab0e467d62379d029c4b3"
-  integrity sha512-zlaUk/wwnR/27FHNarzOtMgfxD1Q0/2Aby7PnURumQTal7yauqQ3c2HHcG/pjLFTvF3AWv44kMWyArVlfHeDlw==
+  version "1.5.185"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.185.tgz#b4f9189c4ef652ddf9f1bb37529e2b79f865e912"
+  integrity sha512-dYOZfUk57hSMPePoIQ1fZWl1Fkj+OshhEVuPacNKWzC1efe56OsHY3l/jCfiAgIICOU3VgOIdoq7ahg7r7n6MQ==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -4981,10 +4981,10 @@ react-native-progress@^5.0.1:
   dependencies:
     prop-types "^15.7.2"
 
-react-native-reanimated@^3.18.0:
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.18.0.tgz#0a246eab38a9e807887fe561a2868cfe85351f3c"
-  integrity sha512-eVcNcqeOkMW+BUWAHdtvN3FKgC8J8wiEJkX6bNGGQaLS7m7e4amTfjIcqf/Ta+lerZLurmDaQ0lICI1CKPrb1Q==
+react-native-reanimated@3.17.4:
+  version "3.17.4"
+  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.17.4.tgz#a8c95ea7c2a089b6ca8f513c7bbff4e450986c7c"
+  integrity sha512-vmkG/N5KZrexHr4v0rZB7ohPVseGVNaCXjGxoRo+NYKgC9+mIZAkg/QIfy9xxfJ73FfTrryO9iYUrxks3ZfKbA==
   dependencies:
     "@babel/plugin-transform-arrow-functions" "^7.0.0-0"
     "@babel/plugin-transform-class-properties" "^7.0.0-0"

@@ -1,5 +1,5 @@
 import { Dimensions } from 'react-native';
-import styled, { css } from 'styled-components/native';
+import styled, { css, DefaultTheme } from 'styled-components/native';
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -10,7 +10,7 @@ export const LoadingScreen = styled.View`
 `;
 
 export const Container = styled.View`
-  ${({ theme }) => css`
+  ${({ theme }: { theme: DefaultTheme }) => css`
     background: ${theme.colors.background};
     flex: 1;
 
@@ -19,7 +19,7 @@ export const Container = styled.View`
 `;
 
 export const Header = styled.ImageBackground`
-  ${({ theme }) => css`
+  ${({ theme }: { theme: DefaultTheme }) => css`
     width: ${windowWidth}px;
     margin-left: -20px;
     height: 220px;
@@ -28,7 +28,7 @@ export const Header = styled.ImageBackground`
 `;
 
 export const Title = styled.Text`
-  ${({ theme }) => css`
+  ${({ theme }: { theme: DefaultTheme }) => css`
     color: ${theme.colors.text};
     font-size: 32px;
     line-height: 38px;

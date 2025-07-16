@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { Image } from 'react-native';
 
-import AnimatedLottieView from 'lottie-react-native';
 
-import pokemonAnimation from './pokemon.json';
+import pokemonImage from '../../assets/img/pokebola.png'; 
+
 
 import * as S from './styles';
 
 export function Welcome() {
   const { navigate } = useNavigation<any>();
-
 
   function handleNavigateToHome() {
     navigate('Home');
@@ -20,7 +20,11 @@ export function Welcome() {
       <S.Content>
         <S.WrapperIcon>
           <S.IconContent>
-            <AnimatedLottieView autoPlay source={pokemonAnimation} loop />
+            {}
+            <Image
+              source={pokemonImage}
+              style={{ width: 200, height: 200, resizeMode: 'contain', marginTop: 40 }}
+            />
           </S.IconContent>
         </S.WrapperIcon>
 

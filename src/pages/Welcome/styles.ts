@@ -25,7 +25,7 @@ export const Content = styled.View`
   ${({ theme }: { theme: DefaultTheme }) => css`
     background: ${theme.colors.backgroundCard.water};
     height: 70%;
-    align-items:center
+    align-items: center;
     justify-content: center;
   `}
 `;

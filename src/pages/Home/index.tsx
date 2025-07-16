@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, } from 'react';
 import { Alert, FlatList } from 'react-native';
 
 import { Card } from '../../components/Card';
@@ -74,11 +74,11 @@ export function Home() {
     return { id, types };
   }
 
-  function handleNavigationPokemonDetail(pokemonId: number) {
-    navigate('About', {
-      pokemonId,
-    });
-  }
+  
+function handleNavigationPokemonDetail(pokemonId: number) {
+  (navigate as any)('About', { pokemonId });
+}
+
   return load ? (
     <S.LoadingScreen>
       <Load />
